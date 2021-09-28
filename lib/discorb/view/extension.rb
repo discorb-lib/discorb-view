@@ -9,7 +9,7 @@ module Discorb::View
     end
 
     def view_handlers
-      @views.map { |view| view.handlers }.flatten.map { |handler| [handler.name, handler] }.to_h
+      @views.map { |_, view| view.handlers }.flatten.map { |handler| [handler.name, handler] }.to_h
     end
 
     def self.extended(base)
