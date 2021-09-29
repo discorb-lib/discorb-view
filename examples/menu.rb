@@ -35,7 +35,6 @@ end
 
 client.once :standby do
   puts "Ready!"
-  MyMenu.start(client.channels["875268321652641792"])
 end
 
 client.on :message do |message|
