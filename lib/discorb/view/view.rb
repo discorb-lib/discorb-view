@@ -5,6 +5,9 @@ module Discorb::View
   # Handler for the components.
   #
   class ComponentHandler < Struct.new(:object, :block)
+    #
+    # Redirects method calls to the object.
+    #
     def method_missing(method, ...)
       object.send(method, ...)
     end
