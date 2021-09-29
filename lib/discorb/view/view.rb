@@ -38,22 +38,33 @@ module Discorb::View
     end
 
     module Prepend
+      attr_writer :interaction
       Result = Struct.new(:content, :embeds, :components)
 
       def initialize(client, channel, ...)
         @client = channel.instance_variable_get(:@client)
         @channel = channel
         @message_id = nil
+        @stopped = false
         @result = Result.new(nil, [], [])
         super(...)
       end
 
       def start
-        render(nil)
+        render
         @client.views[@message_id.to_s] = self
       end
 
-      def render(interaction)
+      def stop!(disable: true, delete: false)
+        @client.views.delete(@message_id.to_s)
+        if disable
+          @stopped = true
+          render
+        end
+        @channel.delete_message!(@message_id) if delete
+      end
+
+      def render
         instance_exec(@result, &actual_view.block)
         components = @result.components.map do |c|
           case c
@@ -65,8 +76,13 @@ module Discorb::View
             raise ArgumentError "Component must be a Symbol or a Button"
           end
         end
-        if interaction
-          interaction.edit(@result.content, embeds: @result.embeds, components: components).wait
+        if @stopped
+          components.each do |component|
+            component.disabled = true
+          end
+        end
+        if @interaction
+          @interaction.edit(@result.content, embeds: @result.embeds, components: components).wait
         else
           msg = @channel.post(@result.content, embeds: @result.embeds, components: components).wait
           @message_id = msg.id

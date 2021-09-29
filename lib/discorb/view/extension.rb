@@ -20,10 +20,11 @@ module Discorb::View
         end
         handler = view.class.components[interaction.custom_id.to_sym]
         @client.log.debug "View: Handling button click #{interaction.custom_id} in #{interaction.message.id}"
+        view.interaction = interaction
         update = view.instance_exec(interaction, &handler.block)
         return unless update
         @client.log.debug "View: Updating view #{interaction.message.id}"
-        view.render(interaction)
+        view.render
       end
     end
   end
