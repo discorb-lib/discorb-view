@@ -1,5 +1,5 @@
 module Discorb::View
-  class Extension
+  module Extension
     attr_accessor :views
 
     extend Discorb::Extension
@@ -8,22 +8,22 @@ module Discorb::View
       handle_button_click(interaction)
     end
 
-    def view_handlers
-      @views.map { |_, view| view.handlers }.flatten.map { |handler| [handler.name, handler] }.to_h
-    end
-
     def self.extended(base)
       base.views = {}
     end
 
     class << self
       def handle_button_click(interaction)
-        unless handler = @client.view_handlers[interaction.custom_id]
-          @client.log.warn "View: No handler for button click #{interaction.custom_id}"
+        unless view = @client.views[interaction.message.id.to_s]
+          @client.log.warn "View: No handler for button click #{interaction.message.id.to_s}"
           return
         end
-        @client.log.debug "View: Handling button click #{interaction.custom_id}"
-        handler.call(interaction)
+        handler = view.class.components[interaction.custom_id.to_sym]
+        @client.log.debug "View: Handling button click #{interaction.custom_id} in #{interaction.message.id}"
+        update = view.instance_exec(interaction, &handler.block)
+        return unless update
+        @client.log.debug "View: Updating view #{interaction.message.id}"
+        view.render(interaction)
       end
     end
   end
