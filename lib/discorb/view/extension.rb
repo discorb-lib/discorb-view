@@ -1,4 +1,8 @@
 module Discorb::View
+  #
+  # An extension for using discorb-view.
+  # @note Client must extend this class to use discorb-view.
+  #
   module Extension
     attr_accessor :views
 
@@ -12,11 +16,13 @@ module Discorb::View
       handle_interaction(interaction)
     end
 
+    # @private
     def self.extended(base)
       base.views = {}
     end
 
     class << self
+      # @private
       def handle_interaction(interaction)
         unless view = @client.views[interaction.message.id.to_s]
           @client.log.warn "View: No handler for #{interaction.message.id.to_s}"
