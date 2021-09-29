@@ -4,7 +4,15 @@ module Discorb::View
   #
   # Handler for the components.
   #
-  class ComponentHandler < Struct.new(:object, :block); end
+  class ComponentHandler < Struct.new(:object, :block)
+    def method_missing(method, ...)
+      object.send(method, ...)
+    end
+
+    def respond_to_missing?(method, include_private = false)
+      object.respond_to?(method, include_private)
+    end
+  end
 
   #
   # Handles the rendering of the components.
