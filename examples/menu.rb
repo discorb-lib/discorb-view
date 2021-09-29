@@ -26,6 +26,10 @@ class MyMenu
     stop!
   end
 
+  view ->(interaction) { !((0...@@texts.length).include?(@page)) } do |result|
+    result.content = "Out of range: Page #{@page + 1}"
+  end
+
   view do |result|
     result.content = @@texts[@page % @@texts.length]
     result.embeds = []
