@@ -15,12 +15,20 @@ module Discorb::View
     end
 
     def button(id, label, type = :secondary, emoji: nil, &block)
+      raise ArgumentError, "block required" unless block_given?
       button = Discorb::Button.new(label, type, emoji: emoji, custom_id: id)
       @components[id] = Handler.new(button, block)
     end
 
+    def select_menu(id, options, placeholder = nil, min_values: nil, max_values: nil, &block)
+      raise ArgumentError, "block required" unless block_given?
+      options.map! { |option| option.is_a?(Discorb::SelectMenu::Option) ? option : Discorb::SelectMenu::Option.new(option) }
+      menu = Discorb::SelectMenu.new(options, placeholder, min_values: min_values, max_values: max_values)
+      @components[id] = Handler.new(menu, block)
+    end
+
     def view(check = nil, &block)
-      raise "View block must be given" unless block_given?
+      raise ArgumentError, "block required" unless block_given?
       @views.insert(0, ViewHandler.new(check, block))
     end
 
