@@ -21,7 +21,7 @@ module Discorb::View
 
     def view(check = nil, &block)
       raise "View block must be given" unless block_given?
-      @views << ViewHandler.new(check, block)
+      @views.insert(0, ViewHandler.new(check, block))
     end
 
     def start(channel, ...)
