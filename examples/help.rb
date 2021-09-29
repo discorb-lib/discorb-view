@@ -20,7 +20,6 @@ class MyPager
   end
 
   select_menu :page, [["Page 1", "1"], ["Page 2", "2"], ["Page 3", "3"], ["Page 4", "4"]], "Page" do |interaction|
-    p interaction.value
     @page = interaction.value.to_i - 1
   end
 
