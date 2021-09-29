@@ -4,7 +4,6 @@ A wrapper of discorb's interaction. This allows you to manage buttons with callb
 
 ## Installation
 
-<!--
 Add this line to your application's Gemfile:
 
 ```ruby
@@ -18,11 +17,6 @@ And then execute:
 Or install it yourself as:
 
     $ gem install discorb-view
--->
-Currently it's not on rubygems, so:
-```ruby
-gem 'discorb-view', github: 'discorb-lib/discorb-view'
-```
 
 ## Usage
 
