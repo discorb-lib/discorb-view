@@ -27,86 +27,87 @@ module Discorb::View
   # @note You should not use this class directly.
   # @abstract
   #
-  module Base
-    # @return [Hash{Symbol => Discorb::Component}] The components.
-    attr_accessor :components
-    # @return [Array<ViewHandler>] The view handlers.
-    attr_accessor :views
+  class Base
+    class << self
+      # @return [Hash{Symbol => Discorb::Component}] The components.
+      attr_accessor :components
+      # @return [Array<ViewHandler>] The view handlers.
+      attr_accessor :views
 
-    # @private
-    def self.extended(base)
-      base.prepend(Discorb::View::Base::Prepend)
-      base.components = {}
-      base.views = []
-    end
-
-    #
-    # Adds button component to the view.
-    #
-    # @param [Symbol] id The id of the button.
-    # @param [String] label The label of the button.
-    # @param [:primary, :secondary, :success, :danger] style The style of the button.
-    # @param [Discorb::Emoji, nil] emoji The emoji of the button.
-    # @yield The block to execute when the button is clicked.
-    # @yieldparam [Discorb::MessageComponentInteraction] interaction The interaction.
-    #
-    def button(id, label, style = :secondary, emoji: nil, &block)
-      raise ArgumentError, "block required" unless block_given?
-      button = Discorb::Button.new(label, style, emoji: emoji, custom_id: id)
-      @components[id] = ComponentHandler.new(button, block)
-    end
-
-    #
-    # Adds select menu component to the view.
-    #
-    # @param [Symbol] id The id of the button.
-    # @param [String] label The label of the button.
-    # @param [String, nil] placeholder The placeholder of the select menu.
-    # @param [Integer, nil] min_length The minimum length of the select menu.
-    # @param [Integer, nil] max_length The max length of the select menu.
-    # @yield The block to execute when the menu is changed.
-    # @yieldparam [Discorb::MessageComponentInteraction] interaction The interaction.
-    #
-    def select_menu(id, options, placeholder = nil, min_values: nil, max_values: nil, &block)
-      raise ArgumentError, "block required" unless block_given?
-      options.map! { |option| option.is_a?(Discorb::SelectMenu::Option) ? option : Discorb::SelectMenu::Option.new(*option) }
-      menu = Discorb::SelectMenu.new(id, options, placeholder: placeholder, min_values: min_values, max_values: max_values)
-      @components[id] = ComponentHandler.new(menu, block)
-    end
-
-    #
-    # Add view handler to the view.
-    #
-    # @param [Proc, nil] check The check of the view handler.
-    #   The view handler will be executed when the check returns true, or check is nil.
-    # @yield The block to execute when the view handler is executed.
-    # @yieldparam [Discorb::View::Base::Prepend::Result] result The result of the view.
-    #
-    # @note There must be one handler with no check.
-    #
-    def view(check = nil, &block)
-      raise ArgumentError, "block required" unless block_given?
-      @views.insert(0, ViewHandler.new(check, block))
-    end
-
-    #
-    # Starts the view.
-    #
-    # @param [Discorb::Messageable] channel The channel to send the message to.
-    #
-    def start(channel, ...)
-      client = channel.instance_variable_get(:@client)
-      if @views.empty?
-        raise "No views defined"
-      elsif not @views.any? { |v| v.check.nil? }
-        raise "No fallback view defined"
-      elsif @views.filter { |v| v.check.nil? }.count > 1
-        raise "Multiple fallback views defined"
+      # @private
+      def inherited(base)
+        base.prepend(Discorb::View::Base::Prepend)
+        base.components = {}
+        base.views = []
       end
-      view = new(client, channel, ...)
-      view.start
-    end
 
+      #
+      # Adds button component to the view.
+      #
+      # @param [Symbol] id The id of the button.
+      # @param [String] label The label of the button.
+      # @param [:primary, :secondary, :success, :danger] style The style of the button.
+      # @param [Discorb::Emoji, nil] emoji The emoji of the button.
+      # @yield The block to execute when the button is clicked.
+      # @yieldparam [Discorb::MessageComponentInteraction] interaction The interaction.
+      #
+      def button(id, label, style = :secondary, emoji: nil, &block)
+        raise ArgumentError, "block required" unless block_given?
+        button = Discorb::Button.new(label, style, emoji: emoji, custom_id: id)
+        @components[id] = ComponentHandler.new(button, block)
+      end
+
+      #
+      # Adds select menu component to the view.
+      #
+      # @param [Symbol] id The id of the button.
+      # @param [String] label The label of the button.
+      # @param [String, nil] placeholder The placeholder of the select menu.
+      # @param [Integer, nil] min_length The minimum length of the select menu.
+      # @param [Integer, nil] max_length The max length of the select menu.
+      # @yield The block to execute when the menu is changed.
+      # @yieldparam [Discorb::MessageComponentInteraction] interaction The interaction.
+      #
+      def select_menu(id, options, placeholder = nil, min_values: nil, max_values: nil, &block)
+        raise ArgumentError, "block required" unless block_given?
+        options.map! { |option| option.is_a?(Discorb::SelectMenu::Option) ? option : Discorb::SelectMenu::Option.new(*option) }
+        menu = Discorb::SelectMenu.new(id, options, placeholder: placeholder, min_values: min_values, max_values: max_values)
+        @components[id] = ComponentHandler.new(menu, block)
+      end
+
+      #
+      # Add view handler to the view.
+      #
+      # @param [Proc, nil] check The check of the view handler.
+      #   The view handler will be executed when the check returns true, or check is nil.
+      # @yield The block to execute when the view handler is executed.
+      # @yieldparam [Discorb::View::Base::Prepend::Result] result The result of the view.
+      #
+      # @note There must be one handler with no check.
+      #
+      def view(check = nil, &block)
+        raise ArgumentError, "block required" unless block_given?
+        @views.insert(0, ViewHandler.new(check, block))
+      end
+
+      #
+      # Starts the view.
+      #
+      # @param [Discorb::Messageable] channel The channel to send the message to.
+      #
+      def start(channel, ...)
+        client = channel.instance_variable_get(:@client)
+        if @views.empty?
+          raise "No views defined"
+        elsif not @views.any? { |v| v.check.nil? }
+          raise "No fallback view defined"
+        elsif @views.filter { |v| v.check.nil? }.count > 1
+          raise "Multiple fallback views defined"
+        end
+        view = new(client, channel, ...)
+        view.start
+      end
+    end
     #
     # Modules for the prepend.
     #
@@ -125,6 +126,7 @@ module Discorb::View
         @channel = channel
         @message_id = nil
         @stopped = false
+        @components = self.class.components.dup.map { |id, component| [id, ComponentHandler.new(component.object.dup, component.block)] }.to_h
         @result = Result.new(nil, [], [])
         super(...)
       end
@@ -158,7 +160,7 @@ module Discorb::View
         components = @result.components.map do |c|
           case c
           when Symbol
-            self.class.components[c]&.object or raise ArgumentError "Unknown component ID #{c}"
+            @components[c]&.object or raise ArgumentError "Unknown component ID #{c}"
           when Button
             c
           else

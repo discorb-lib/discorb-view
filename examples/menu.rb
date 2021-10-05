@@ -3,11 +3,9 @@ require "discorb/view"
 
 client = Discorb::Client.new
 
-client.extend Discorb::View::Extension
+client.load_extension Discorb::View::Extension
 
-class MyMenu
-  extend Discorb::View::Base
-
+class MyMenu < Discorb::View::Base
   @@texts = ["A", "B"]
 
   def initialize
