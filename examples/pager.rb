@@ -3,10 +3,9 @@ require "discorb/view"
 
 client = Discorb::Client.new
 
-client.extend Discorb::View::Extension
+client.load_extension Discorb::View::Extension
 
-class MyPager
-  extend Discorb::View::Base
+class MyPager < Discorb::View::Base
 
   @@pages = [
     "Page 1 Content",
