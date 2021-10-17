@@ -32,6 +32,7 @@ module Discorb::View
       view.render
     end
 
+    # @private
     def self.loaded(client)
       class << client
         attr_accessor :views
